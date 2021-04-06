@@ -34,6 +34,13 @@ const hugepagesControlBaseDeclarationSlots = `
     deny-auto-connection: true
 `
 
+const hugepagesMountConnectedPlugSecComp = `
+# Description: Allow mount and umount syscall access.
+mount
+umount
+umount2
+`
+
 const hugepagesControlConnectedPlugAppArmor = `
 # Allow configuring huge pages via /sys or /proc
 /sys/kernel/mm/hugepages/{,hugepages-[0-9]*}/* r,
@@ -62,6 +69,11 @@ owner /{dev,run}/hugepages/{,**} rwk,
 /sys/kernel/mm/transparent_hugepage/khugepaged/defrag w,
 /sys/kernel/mm/transparent_hugepage/khugepaged/max_ptes_{none,swap} w,
 /sys/kernel/mm/transparent_hugepage/khugepaged/pages_to_scan w,
+
+
+# Description: Allow mounting and unmounting hugetlbfs filesystems.
+# Required for mounts and unmounts
+capability sys_admin,
 `
 
 func init() {
@@ -72,5 +84,6 @@ func init() {
 		implicitOnClassic:     true,
 		baseDeclarationSlots:  hugepagesControlBaseDeclarationSlots,
 		connectedPlugAppArmor: hugepagesControlConnectedPlugAppArmor,
+		connectedPlugSecComp:  hugepagesMountConnectedPlugSecComp,
 	})
 }
